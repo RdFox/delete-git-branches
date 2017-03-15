@@ -5,7 +5,7 @@ git fetch -p origin
 DAYS=$1
 
 if [ "$DAYS" == "" ]; then
-  DAYS=7
+  DAYS=30
 fi
 
 date --version > /dev/null 2>&1
@@ -15,9 +15,9 @@ else
   DATE=`date  -v-${DAYS}d +%Y-%m-%d`
 fi
 
-REMOTE_BRANCHES=$(for k in `git branch -r --merged master | perl -pe 's/^..(.*?)( ->.*)?$/\1/'`; do echo -e `git log -1 --pretty=format:"%Cgreen%ci %Creset" --after="$DATE" $k -- | head -n 1`$k; done | sort -r | grep '^origin' | sed 's/ *origin\///')
+REMOTE_BRANCHES=$(for k in `git branch -r --merged develop | perl -pe 's/^..(.*?)( ->.*)?$/\1/'`; do echo -e `git log -1 --pretty=format:"%Cgreen%ci %Creset" --before="$DATE" $k -- | head -n 1`$k; done | sort -r | grep '^origin' | sed 's/ *origin\///')
 
-LOCAL_BRANCHES=$(for k in `git branch --merged master | perl -pe 's/^..(.*?)( ->.*)?$/\1/'`; do echo -e `git log -1 --pretty=format:"%Cgreen%ci %Creset" --after="$DATE" $k -- | head -n 1`$k; done | sort -r | grep '^origin')
+LOCAL_BRANCHES=$(for k in `git branch --merged develop | perl -pe 's/^..(.*?)( ->.*)?$/\1/'`; do echo -e `git log -1 --pretty=format:"%Cgreen%ci %Creset" --before="$DATE" $k -- | head -n 1`$k; done | sort -r | grep '^origin')
 
 
 if [ "$REMOTE_BRANCHES" != "" ]; then
@@ -27,7 +27,8 @@ if [ "$REMOTE_BRANCHES" != "" ]; then
   read -p "Continue (y/n)? "
 
   if [ "$REPLY" == "y" ]; then
-  echo $REMOTE_BRANCHES | xargs git push origin --delete
+  echo $REMOTE_BRANCHES
+  echo "Don't delete yet!! $REMOTE_BRANCHES | xargs git push origin --delete"
   echo "Done!, Obsolete branches are removed"
   else
   echo "Moving on...."
